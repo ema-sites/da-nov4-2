@@ -73,6 +73,89 @@ function bindEvents(block) {
   });
 }
 
+const AMOUNT_PATTERN = /^\s*\$?\s*\d[\d,\s]*(\.\d+)?\s*\$?\s*$/;
+
+/**
+ * Renders a prize such as "$500,000" as one tile per digit group, keeping the
+ * original text available to assistive technology.
+ */
+function decorateAmount(p) {
+  const text = p.textContent.trim();
+  const groups = text.replace(/[^\d,]/g, '').split(',').filter(Boolean);
+  if (!groups.length) return;
+
+  const label = document.createElement('span');
+  label.className = 'carousel-winners-amount-label';
+  label.textContent = text;
+
+  const tiles = document.createElement('span');
+  tiles.className = 'carousel-winners-amount-tiles';
+  tiles.setAttribute('aria-hidden', 'true');
+  groups.forEach((group, idx) => {
+    const tile = document.createElement('span');
+    tile.className = 'carousel-winners-amount-tile';
+    if (idx === 0 && text.includes('$')) tile.classList.add('has-currency');
+    tile.textContent = group;
+    tiles.append(tile);
+  });
+
+  p.replaceChildren(label, tiles);
+}
+
+/**
+ * Splits the details cell into an info column (name, location, link) and a
+ * prize column (game logo, ribbon, amount). Authors may omit any of these.
+ */
+function decorateContent(cell, slide) {
+  const info = document.createElement('div');
+  info.className = 'carousel-winners-info';
+  const prize = document.createElement('div');
+  prize.className = 'carousel-winners-prize';
+  const game = document.createElement('div');
+  game.className = 'carousel-winners-game';
+
+  const texts = [];
+  [...cell.children].forEach((el) => {
+    if (/^H[1-6]$/.test(el.tagName)) {
+      el.classList.add('carousel-winners-name');
+      info.append(el);
+    } else if (el.querySelector('picture, img')) {
+      el.classList.add('carousel-winners-logo');
+      game.append(el);
+    } else if (el.querySelector('a')) {
+      el.classList.add('carousel-winners-cta');
+      info.append(el);
+    } else if (AMOUNT_PATTERN.test(el.textContent) && el.textContent.trim()) {
+      el.classList.add('carousel-winners-amount');
+      decorateAmount(el);
+      prize.append(el);
+    } else if (el.textContent.trim()) {
+      texts.push(el);
+    } else {
+      el.remove();
+    }
+  });
+
+  // first remaining text is the location, the next one the ribbon label
+  const [location, ribbon, ...rest] = texts;
+  if (location) {
+    location.classList.add('carousel-winners-location');
+    const name = info.querySelector('.carousel-winners-name');
+    if (name) name.after(location);
+    else info.prepend(location);
+    const province = location.textContent.trim().match(/\b([A-Z]{2})$/);
+    if (province) [, slide.dataset.province] = province;
+  }
+  if (ribbon) {
+    ribbon.classList.add('carousel-winners-ribbon');
+    game.append(ribbon);
+  }
+  rest.forEach((el) => info.append(el));
+
+  if (game.children.length) prize.prepend(game);
+  cell.replaceChildren(info, prize);
+}
+
 function createSlide(row, slideIndex, carouselId) {
   const slide = document.createElement('li');
   slide.dataset.slideIndex = slideIndex;
@@ -81,6 +164,7 @@ function createSlide(row, slideIndex, carouselId) {
 
   row.querySelectorAll(':scope > div').forEach((column, colIdx) => {
     column.classList.add(`carousel-winners-slide-${colIdx === 0 ? 'image' : 'content'}`);
+    if (colIdx > 0) decorateContent(column, slide);
     slide.append(column);
   });
 

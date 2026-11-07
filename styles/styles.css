@@ -138,34 +138,48 @@ main img {
   width: 100%;
 }
 
-/* sections */
+/* sections: the source stacks hero, heading bars and bands flush, with no gaps */
 main > .section {
   margin: 0;
-  padding: var(--section-padding);
+  padding: 0;
 }
 
 main > .section > div {
+  box-sizing: border-box;
   max-width: var(--content-max-width);
-  margin: auto;
-  padding: 0 15px;
+  margin: 0 auto;
+  padding: 0 10px;
 }
 
-main > .section:first-of-type {
-  margin-top: 0;
-  padding-top: 0;
+/* section metadata: mobile-only — source shows these only below 768px */
+main .section.mobile-only > div {
+  max-width: none;
+  padding: 0;
 }
 
-@media (width >= 900px) {
-  main > .section > div {
-    padding: 0 32px;
+main .section.mobile-only p {
+  margin: 0;
+  line-height: 0;
+}
+
+main .section.mobile-only img {
+  display: block;
+  width: 100%;
+  height: 75px;
+  object-fit: none;
+  object-position: center;
+}
+
+@media (width >= 768px) {
+  main .section.mobile-only {
+    display: none;
   }
 }
 
-/* section metadata: light-blue (ALC winners section) */
+/* section metadata: light-blue (winners band) */
 main .section.light-blue {
-  background-color: var(--alc-blue);
+  background-color: var(--alc-light-blue);
   color: #fff;
-  padding: 32px 0;
 }
 
 main .section.light-blue h2,
@@ -175,6 +189,64 @@ main .section.light-blue h3 {
 
 main .section.light-blue a:any-link {
   color: #fff;
+}
+
+/* section metadata: blue-heading / green-heading — first h2 becomes a full-width 40px bar */
+main .section.blue-heading { --heading-bar-color: var(--alc-blue); }
+main .section.green-heading { --heading-bar-color: var(--alc-green); }
+
+main .section.blue-heading > .default-content-wrapper > h2:first-child,
+main .section.green-heading > .default-content-wrapper > h2:first-child {
+  margin: 0;
+  padding: 10px 0;
+  background-color: var(--heading-bar-color);
+  box-shadow: 0 0 0 100vmax var(--heading-bar-color);
+  clip-path: inset(0 -100vmax);
+  color: #fff;
+  font-family: var(--heading-font-family);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+/* section metadata: sidebar — first block fills the main column, second block sits in a right rail */
+main .section.sidebar {
+  padding-bottom: 32px;
+}
+
+main .section.sidebar > .default-content-wrapper {
+  margin-bottom: 23px;
+}
+
+@media (width >= 900px) {
+  main .section.sidebar {
+    display: grid;
+    grid-template-columns:
+      [full-start] minmax(10px, 1fr)
+      [main-start] minmax(0, 773px)
+      minmax(0, 367px) [main-end]
+      minmax(10px, 1fr) [full-end];
+    column-gap: 10px;
+    align-items: start;
+  }
+
+  main .section.sidebar > div {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  main .section.sidebar > .default-content-wrapper {
+    grid-column: main-start / main-end;
+  }
+
+  main .section.sidebar > div:not(.default-content-wrapper) {
+    grid-column: 2;
+  }
+
+  main .section.sidebar > div:not(.default-content-wrapper) ~ div:not(.default-content-wrapper) {
+    grid-column: 3;
+  }
 }
 
 /* section metadata: light */

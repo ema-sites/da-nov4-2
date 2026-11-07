@@ -1,43 +1,31 @@
+/* values from computed styles of alc.ca footer.main-footer (1440 and 375 wide) */
 footer {
-  background-color: var(--light-color);
-  font-size: var(--body-font-size-xs);
-  color: var(--text-color);
+  --footer-text: #69727b;
+  --footer-strong: #4e5b68;
+  --footer-rule: #d4dadf;
+  --footer-band: #e9ecef;
+
+  background-color: #fff;
+  color: var(--footer-text);
+  font-family: var(--body-font-family);
 }
 
 footer .footer > div {
-  margin: auto;
-  max-width: var(--content-max-width);
-  padding: 32px 15px 24px;
+  display: flex;
+  flex-direction: column;
 }
 
-footer .footer > div:first-child {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
+/* low-specificity reset so the per-element rules below can set margins */
+footer .footer :where(p, h2, h3, ul, form) {
+  margin: 0;
 }
 
-footer .footer h3 {
-  font-family: var(--heading-font-family);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--dark-color);
-  text-transform: uppercase;
-  margin: 0 0 8px;
-}
-
-footer .footer ul {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 16px;
-}
-
-footer .footer ul li {
-  padding: 2px 0;
+footer .footer :where(h2, h3) {
+  font-family: var(--body-font-family);
 }
 
 footer .footer a:any-link {
-  color: var(--link-color);
-  font-size: 13px;
+  color: inherit;
   text-decoration: none;
 }
 
@@ -45,33 +33,428 @@ footer .footer a:hover {
   text-decoration: underline;
 }
 
-footer .footer p {
-  margin: 0;
+footer .footer-section {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 10px;
 }
 
-footer .footer > div:last-child {
+/* ---------- newsletter band ---------- */
+footer .footer-signup {
+  max-width: none;
+  padding: 22px 10px 23px;
+  border-top: 1px solid var(--footer-rule);
+  border-bottom: 1px solid var(--footer-rule);
+  background-color: var(--footer-band);
+}
+
+footer .footer-signup-message {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+footer .footer-signup-form {
+  display: flex;
+  margin-top: 24px;
+}
+
+footer .footer-signup-form input {
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 46px;
+  padding: 10px 16px;
+  border: 1px solid #aebbc7;
+  border-radius: 5px 0 0 5px;
+  background: #fff;
+  color: #282f36;
+  font-size: 14px;
+}
+
+footer .footer-signup-form button {
+  flex: 0 0 115px;
+  height: 46px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  background-color: var(--link-color);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+footer .footer-signup-form button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+/* ---------- contact / social / feedback / badge ---------- */
+footer .footer-contact {
+  gap: 0;
+  padding-top: 19px;
+}
+
+footer .footer-contact-link,
+footer .footer-feedback {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 20px;
+  color: var(--link-color);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 40px;
+}
+
+footer .footer-contact-link::before,
+footer .footer-feedback::before {
+  content: '';
+  flex: 0 0 24px;
+  height: 22px;
+  background-color: var(--link-color);
+  mask: var(--icon) center / contain no-repeat;
+}
+
+footer .footer-contact-link::before {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.07 15.07 0 0 1-6.59-6.58l2.2-2.21a1 1 0 0 0 .25-1.01A11.36 11.36 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1 17 17 0 0 0 17 17 1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1zM12 3v10l3-3h6V3h-9z'/%3E%3C/svg%3E");
+}
+
+footer .footer-feedback::before {
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z'/%3E%3C/svg%3E");
+}
+
+footer .footer-social {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 13px 0 15px 20px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+footer .footer-social a:first-of-type {
+  margin-left: 4px;
+}
+
+footer .footer-social img {
+  display: block;
+  width: 42px;
+  height: 42px;
+}
+
+footer .footer-feedback {
+  padding-bottom: 8px;
+  color: var(--link-color);
+}
+
+footer .footer-badge {
+  line-height: 0;
+}
+
+footer .footer-badge img {
+  width: 274px;
+  height: auto;
+}
+
+/* ---------- link groups: desktop columns vs compact accordion ---------- */
+footer .footer-links {
+  display: none;
+}
+
+footer .footer-links-compact {
+  max-width: none;
+  margin-top: 27px;
+  padding: 0;
+}
+
+footer .footer-links-compact .footer-group {
   border-top: 1px solid #ddd;
-  padding-top: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+footer .footer-links-compact .footer-group + .footer-group {
+  border-top: 0;
+}
+
+footer .footer-group-toggle {
+  display: block;
+  width: 100%;
+  padding: 15px 20px 10px 70px;
+  border: 0;
+  background: #fff;
+  color: #333;
+  font-family: var(--body-font-family);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 26px;
+  text-align: left;
+  cursor: pointer;
+}
+
+footer .footer-group-toggle::before {
+  content: '+ ';
+  white-space: pre;
+}
+
+footer .footer-group-toggle[aria-expanded='true']::before {
+  content: '- ';
+}
+
+footer .footer-links-compact ul {
+  display: none;
+  list-style: none;
+  padding: 26px 20px 31px 90px;
+  border-top: 1px solid #ddd;
+}
+
+footer .footer-group-toggle[aria-expanded='true'] {
+  border-bottom: 0;
+}
+
+footer .footer-links-compact h2:has([aria-expanded='true']) + ul {
+  display: block;
+}
+
+footer .footer-links-compact li {
+  font-size: 16px;
+  line-height: 20px;
+  padding: 4px 0;
+}
+
+/* ---------- other sites ---------- */
+footer .footer-sites {
+  align-items: center;
+  padding-top: 40px;
+}
+
+footer .footer-sites h3 {
+  font-family: var(--heading-font-family);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 19px;
+  color: var(--footer-text);
+}
+
+footer .footer-sites p {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-top: 20px;
+  line-height: 0;
+}
+
+footer .footer-sites img {
+  width: auto;
+  height: 55px;
+}
+
+/* ---------- legal ---------- */
+footer .footer-legal {
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 10px;
   text-align: center;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 17px;
 }
 
-footer .footer > div:last-child p {
-  margin: 4px 0;
+footer .footer-legal-links {
+  order: 1;
+  max-width: 310px;
+  color: var(--footer-strong);
 }
 
-footer .footer > div:last-child a:any-link {
-  font-size: 11px;
-  text-transform: uppercase;
+footer .footer-legal-links a:any-link {
+  color: var(--footer-text);
+  font-weight: 800;
 }
 
+footer .footer-legal-badges {
+  order: 2;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 23px 0 2px;
+  line-height: 0;
+}
+
+footer .footer-legal-badges img {
+  width: auto;
+  height: 54px;
+}
+
+footer .footer-legal-note {
+  order: 3;
+  margin-top: 10px;
+}
+
+/* ---------- desktop ---------- */
 @media (width >= 900px) {
-  footer .footer > div {
-    padding: 32px 32px 24px;
+  footer .footer-signup {
+    display: grid;
+    grid-template-columns: minmax(0, 677px) minmax(0, 473px);
+    justify-content: center;
+    align-items: start;
+    padding: 21px 10px;
   }
 
-  footer .footer > div:first-child {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
+  footer .footer-signup-message {
+    font-size: 18px;
+    line-height: 25.7px;
+    padding-top: 0;
+  }
+
+  footer .footer-signup-form {
+    margin-top: 9px;
+  }
+
+  footer .footer-signup-form input {
+    font-size: 16px;
+  }
+
+  footer .footer-contact {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    padding: 20px 10px 0;
+  }
+
+  footer .footer-contact::after {
+    content: '';
+    grid-column: 1 / -1;
+    margin: 2px 10px 0 15px;
+    border-bottom: 1px solid var(--footer-rule);
+  }
+
+  footer .footer-contact > p {
+    padding: 0 10px;
+  }
+
+  footer .footer-contact-link,
+  footer .footer-feedback {
+    line-height: 26px;
+  }
+
+  footer .footer-contact > .footer-social {
+    padding: 0;
+    line-height: 60px;
+  }
+
+  footer .footer-social a:first-of-type {
+    margin-left: 30px;
+  }
+
+  footer .footer-social img {
+    width: 28px;
+    height: 28px;
+  }
+
+  footer .footer-badge {
+    padding-top: 0;
+  }
+
+  footer .footer-badge img {
+    width: 270px;
+  }
+
+  footer .footer-links {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 10px 20px 0;
+  }
+
+  footer .footer-links-compact {
+    display: none;
+  }
+
+  footer .footer-links .footer-group {
+    padding: 0 10px;
+  }
+
+  footer .footer-links h2 {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 27px;
+    color: var(--footer-strong);
+  }
+
+  footer .footer-links h2 a:any-link {
+    color: var(--footer-text);
+  }
+
+  footer .footer-links h3 {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16.8px;
+  }
+
+  footer .footer-links ul {
+    list-style: none;
+    margin-top: 10px;
+    padding: 0;
+  }
+
+  footer .footer-links li {
+    margin: 4px 0;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  footer .footer-sites {
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
+    padding: 0 10px 21px;
+    border-bottom: 1px solid var(--footer-rule);
+    max-width: 1160px;
+  }
+
+  footer .footer-sites p {
+    gap: 12px;
+    margin-top: 0;
+  }
+
+  footer .footer-legal {
+    display: grid;
+    grid-template-columns: minmax(0, 677px) minmax(0, 483px);
+    grid-template-rows: repeat(3, auto) 1fr;
+    justify-content: center;
+    align-items: start;
+    padding: 20px 10px 9px;
+    text-align: left;
+    font-weight: 800;
+    line-height: 17.1px;
+  }
+
+  footer .footer-legal > p {
+    grid-column: 1;
+    padding: 0 10px;
+  }
+
+  footer .footer-legal-links {
+    max-width: none;
+  }
+
+  footer .footer-legal-note {
+    margin-top: 10px;
+  }
+
+  footer .footer-legal .footer-legal-badges {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    justify-content: flex-start;
+    gap: 16px;
+    margin: 0;
+  }
+
+  footer .footer-legal-badges img {
+    height: 66px;
   }
 }

@@ -42,22 +42,53 @@ var CustomImportScript = (() => {
   });
 
   // tools/importer/parsers/carousel-hero-banner.js
+  function pickPicturefillSrcs(container) {
+    let renditions = [...container.querySelectorAll("[data-src]")].map((s) => ({
+      media: s.getAttribute("data-media") || "",
+      src: s.getAttribute("data-src")
+    }));
+    if (!renditions.length && container.hasAttribute("data-picturefill-srcs")) {
+      try {
+        renditions = JSON.parse(container.getAttribute("data-picturefill-srcs"));
+      } catch (e) {
+        renditions = [];
+      }
+    }
+    if (renditions.length) {
+      const minWidth = (r) => {
+        const m2 = r.media.match(/min-width:\s*(\d+)/);
+        return m2 ? parseInt(m2[1], 10) : 0;
+      };
+      renditions.sort((a, b) => minWidth(b) - minWidth(a));
+      const desktop = renditions[0].src;
+      const mobile = renditions[renditions.length - 1].src;
+      return [desktop, mobile !== desktop ? mobile : null];
+    }
+    const style = container.getAttribute("style") || "";
+    const m = style.match(/background-image:\s*url\(["']?([^"')]+)["']?\)/i);
+    return [m ? m[1] : null, null];
+  }
   function parse(element, { document }) {
     const cells = [];
     const slides = element.querySelectorAll("li.slide");
     slides.forEach((slide) => {
+      var _a;
       const article = slide.querySelector("article.fca-carousel-slide-promo");
       if (!article) return;
       const link = slide.querySelector("a[href]");
       const href = link ? link.getAttribute("href") : "";
-      const img = slide.querySelector(".slide-content img, .picturefill-background img, article img");
       const imageCell = document.createElement("div");
-      if (img) {
-        const newImg = document.createElement("img");
-        newImg.src = img.src;
-        if (img.alt) newImg.alt = img.alt;
-        imageCell.appendChild(newImg);
-      }
+      const bgHost = slide.querySelector(".picturefill-background") || article;
+      const [desktopSrc, mobileSrc] = pickPicturefillSrcs(bgHost);
+      const src = desktopSrc || ((_a = slide.querySelector("img")) == null ? void 0 : _a.getAttribute("src"));
+      [src, mobileSrc].filter(Boolean).forEach((s) => {
+        const p = document.createElement("p");
+        const img = document.createElement("img");
+        img.src = encodeURI(decodeURI(s));
+        img.alt = "";
+        p.appendChild(img);
+        imageCell.appendChild(p);
+      });
       const textCell = document.createElement("div");
       if (href) {
         const cta = document.createElement("a");
@@ -76,14 +107,18 @@ var CustomImportScript = (() => {
     const cells = [];
     const slides = element.querySelectorAll(".slick-slide:not(.slick-cloned)");
     slides.forEach((slide) => {
+      var _a, _b;
       const slideContent = slide.querySelector(".slide");
       if (!slideContent) return;
       const imageCell = document.createElement("div");
-      const bgImg = slideContent.querySelector(":scope > img");
-      if (bgImg) {
+      const photoHost = slide.querySelector(".winner-image");
+      const photoStyle = photoHost ? photoHost.getAttribute("style") || "" : "";
+      const photoMatch = photoStyle.match(/background-image:\s*url\(["']?([^"')]+)["']?\)/i);
+      const photoSrc = photoMatch ? photoMatch[1] : (_a = slideContent.querySelector(":scope > img")) == null ? void 0 : _a.getAttribute("src");
+      if (photoSrc) {
         const newImg = document.createElement("img");
-        newImg.src = bgImg.src;
-        if (bgImg.alt) newImg.alt = bgImg.alt;
+        newImg.src = encodeURI(decodeURI(photoSrc));
+        newImg.alt = ((_b = slide.querySelector(".winner-info h3")) == null ? void 0 : _b.textContent.trim()) || "";
         imageCell.appendChild(newImg);
       }
       const textCell = document.createElement("div");
@@ -113,11 +148,10 @@ var CustomImportScript = (() => {
         textCell.appendChild(badge);
       }
       const prizeAmount = slide.querySelector(".prize-amount");
-      if (prizeAmount) {
+      const prizeDigits = prizeAmount ? prizeAmount.textContent.replace(/[^0-9]/g, "") : "";
+      if (prizeDigits) {
         const prize = document.createElement("p");
-        const spans = prizeAmount.querySelectorAll("span");
-        const prizeText = Array.from(spans).map((s) => s.textContent.trim()).filter(Boolean).join(",");
-        prize.textContent = `$${prizeText}`;
+        prize.textContent = `$${Number(prizeDigits).toLocaleString("en-US")}`;
         textCell.appendChild(prize);
       }
       const winnersLink = slide.querySelector(".winner-info a.all-winners");
@@ -134,39 +168,72 @@ var CustomImportScript = (() => {
   }
 
   // tools/importer/parsers/cards-game-tiles.js
+  function backgroundUrl(el) {
+    const style = el ? el.getAttribute("style") || "" : "";
+    const m = style.match(/background-image:\s*url\(["']?([^"')]+)["']?\)/i);
+    return m ? m[1] : null;
+  }
+  function cleanParagraph(source, document) {
+    const p = document.createElement("p");
+    source.childNodes.forEach((node) => {
+      if (node.nodeType === 3) {
+        p.append(node.textContent.replace(/\s+/g, " "));
+      } else if (node.nodeName === "A" && node.getAttribute("href")) {
+        const a = document.createElement("a");
+        a.href = node.getAttribute("href");
+        a.textContent = node.textContent.replace(/\s+/g, " ").trim();
+        if (a.textContent) {
+          if (p.textContent && !/\s$/.test(p.textContent)) p.append(" ");
+          p.append(a);
+        }
+      } else if (node.textContent && node.textContent.trim()) {
+        p.append(node.textContent.replace(/\s+/g, " "));
+      }
+    });
+    p.innerHTML = p.innerHTML.trim();
+    return p.textContent.trim() ? p : null;
+  }
   function parse3(element, { document }) {
     const cells = [];
     const tiles = element.querySelectorAll(".game-tile.parbase");
     tiles.forEach((tile) => {
+      var _a;
       const article = tile.querySelector("article.game-tile");
       if (!article) return;
+      const title = article.querySelector("h3.game-tile-title");
+      const titleText = title ? title.textContent.trim() : "";
       const imageCell = document.createElement("div");
-      const img = article.querySelector(".game-tile-image-container > img");
-      if (img) {
-        const newImg = document.createElement("img");
-        newImg.src = img.src;
-        newImg.alt = img.alt || "";
-        imageCell.appendChild(newImg);
+      const imgHost = article.querySelector(".game-tile-image-container");
+      const src = backgroundUrl(imgHost) || ((_a = imgHost == null ? void 0 : imgHost.querySelector("img")) == null ? void 0 : _a.getAttribute("src"));
+      if (src) {
+        const img = document.createElement("img");
+        img.src = encodeURI(decodeURI(src));
+        img.alt = titleText;
+        imageCell.appendChild(img);
+      }
+      if (article.querySelector(".game-flag.new")) {
+        const flag = document.createElement("p");
+        flag.textContent = "NEW";
+        imageCell.appendChild(flag);
       }
       const textCell = document.createElement("div");
-      const title = article.querySelector("h3.game-tile-title");
-      if (title) {
+      if (titleText) {
         const h3 = document.createElement("h3");
-        h3.textContent = title.textContent.trim();
+        h3.textContent = titleText;
         textCell.appendChild(h3);
       }
-      const descEl = article.querySelector(".game-tile-description p");
-      if (descEl && descEl.textContent.trim()) {
-        const p = document.createElement("p");
-        p.textContent = descEl.textContent.trim().replace(/\s+/g, " ");
-        textCell.appendChild(p);
-      }
+      article.querySelectorAll(".game-tile-description p").forEach((descEl) => {
+        const p = cleanParagraph(descEl, document);
+        if (p) textCell.appendChild(p);
+      });
       const cta = article.querySelector("a.button");
       if (cta) {
+        const p = document.createElement("p");
         const link = document.createElement("a");
         link.href = cta.getAttribute("href");
         link.textContent = cta.textContent.trim();
-        textCell.appendChild(link);
+        p.appendChild(link);
+        textCell.appendChild(p);
       }
       cells.push([imageCell, textCell]);
     });
@@ -177,15 +244,24 @@ var CustomImportScript = (() => {
   // tools/importer/parsers/cards-promo-banner.js
   function parse4(element, { document }) {
     const cells = [];
-    const link = element.querySelector("a.html-promo-image-container");
-    if (link) {
-      const href = link.getAttribute("href") || "";
-      const contentCell = document.createElement("div");
+    element.querySelectorAll(".cmp-image a[href]").forEach((link) => {
+      const sourceImg = link.querySelector("img");
+      if (!sourceImg) return;
+      const src = sourceImg.getAttribute("src") || sourceImg.getAttribute("data-src");
+      if (!src) return;
       const anchor = document.createElement("a");
-      anchor.setAttribute("href", href);
-      anchor.textContent = "View Promo";
-      contentCell.appendChild(anchor);
-      cells.push([contentCell]);
+      anchor.setAttribute("href", link.getAttribute("href"));
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = sourceImg.getAttribute("alt") || "";
+      anchor.appendChild(img);
+      const cell = document.createElement("div");
+      cell.appendChild(anchor);
+      cells.push([cell]);
+    });
+    if (!cells.length) {
+      element.remove();
+      return;
     }
     const block = WebImporter.Blocks.createBlock(document, { name: "cards-promo-banner", cells });
     element.replaceWith(block);
@@ -202,7 +278,40 @@ var CustomImportScript = (() => {
       const qualtricsEl = document.getElementById("ZN_3Eu2u7P45FmpwJ5");
       if (qualtricsEl) qualtricsEl.remove();
       document.querySelectorAll("iframe").forEach((el) => el.remove());
-      document.querySelectorAll(".html-promo.parbase.aem-GridColumn--default--hide").forEach((el) => el.remove());
+      document.querySelectorAll(".html-promo.parbase.aem-GridColumn--default--hide").forEach((el) => {
+        var _a;
+        const link = el.querySelector("a[href]");
+        const host = el.querySelector(".picturefill-background") || el;
+        let renditions = [];
+        try {
+          renditions = JSON.parse(host.getAttribute("data-picturefill-srcs") || "[]");
+        } catch (e) {
+          renditions = [];
+        }
+        if (!renditions.length) {
+          renditions = [...host.querySelectorAll("[data-src]")].map((s) => ({ media: s.getAttribute("data-media") || "", src: s.getAttribute("data-src") }));
+        }
+        const minWidth = (r) => parseInt((r.media.match(/min-width:\s*(\d+)/) || [0, 0])[1], 10);
+        renditions.sort((a2, b) => minWidth(a2) - minWidth(b));
+        const src = (_a = renditions[0]) == null ? void 0 : _a.src;
+        if (!link || !src) {
+          el.remove();
+          return;
+        }
+        const wrapper = document.createElement("div");
+        wrapper.className = "alc-mobile-promo";
+        const p = document.createElement("p");
+        const a = document.createElement("a");
+        a.href = link.getAttribute("href");
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "Winning Numbers";
+        a.appendChild(img);
+        p.appendChild(a);
+        wrapper.appendChild(p);
+        el.replaceWith(wrapper);
+      });
+      document.querySelectorAll(".alc-mobile-banner").forEach((el) => (el.closest(".banner") || el).remove());
     }
     if (hookName === "afterTransform") {
       const { document } = payload;
@@ -256,18 +365,7 @@ var CustomImportScript = (() => {
         const isFirstSection = marker.getAttribute("data-excat-first-section") === "true";
         let insertionPoint = null;
         if (i < sections.length - 1) {
-          let sibling = marker.nextElementSibling;
-          while (sibling) {
-            if (sibling.tagName === "HR" && !sibling.hasAttribute("data-excat-section-id")) {
-              insertionPoint = sibling;
-              break;
-            }
-            if (sibling.tagName === "HR" && sibling.hasAttribute("data-excat-section-id") && sibling.getAttribute("data-excat-section-id") !== section.id) {
-              insertionPoint = sibling;
-              break;
-            }
-            sibling = sibling.nextElementSibling;
-          }
+          insertionPoint = [...document.querySelectorAll("hr")].find((hr) => hr !== marker && marker.compareDocumentPosition(hr) & Node.DOCUMENT_POSITION_FOLLOWING && hr.getAttribute("data-excat-section-id") !== section.id) || null;
         }
         const sectionMetadata = WebImporter.Blocks.createBlock(document, {
           name: "Section Metadata",
@@ -318,11 +416,23 @@ var CustomImportScript = (() => {
       {
         "name": "cards-promo-banner",
         "instances": [
-          "div.html-promo.parbase"
+          ".alc-container.aem-GridColumn--sm--6.aem-GridColumn--md--6"
         ]
       }
     ],
     "sections": [
+      {
+        "id": "section-mobile-promo",
+        "name": "Mobile Winning Numbers Banner",
+        "selector": [
+          ".alc-mobile-promo"
+        ],
+        "style": "mobile-only",
+        "blocks": [],
+        "defaultContent": [
+          ".alc-mobile-promo"
+        ]
+      },
       {
         "id": "section-hero-carousel",
         "name": "Hero Carousel",
@@ -341,7 +451,7 @@ var CustomImportScript = (() => {
         "selector": [
           "div.section-header.cmp-section-header--alc-blue"
         ],
-        "style": "light-blue",
+        "style": "light-blue, blue-heading",
         "blocks": [
           "carousel-winners"
         ],
@@ -353,9 +463,9 @@ var CustomImportScript = (() => {
         "id": "section-featured-games",
         "name": "Featured Games and Promotions",
         "selector": [
-          "div.alc-container:nth-of-type(3)"
+          "div.section-header.cmp-section-header--alc-green"
         ],
-        "style": null,
+        "style": "green-heading, sidebar",
         "blocks": [
           "cards-game-tiles",
           "cards-promo-banner"
@@ -395,6 +505,17 @@ var CustomImportScript = (() => {
     return pageBlocks;
   }
   var import_alc_default = {
+    // Picturefill renditions sit in empty <span data-src> elements, which html2md strips
+    // before parsers run; copy them onto the container first.
+    onLoad: ({ document }) => {
+      document.querySelectorAll(".picturefill-background").forEach((el) => {
+        const srcs = [...el.querySelectorAll("[data-src]")].map((s) => ({
+          media: s.getAttribute("data-media") || "",
+          src: s.getAttribute("data-src")
+        }));
+        if (srcs.length) el.setAttribute("data-picturefill-srcs", JSON.stringify(srcs));
+      });
+    },
     transform: (payload) => {
       const { document, url, params } = payload;
       const main = document.body;

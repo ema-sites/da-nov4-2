@@ -32,11 +32,23 @@
         {
           "name": "cards-promo-banner",
           "instances": [
-            "div.html-promo.parbase"
+            ".alc-container.aem-GridColumn--sm--6.aem-GridColumn--md--6"
           ]
         }
       ],
       "sections": [
+        {
+          "id": "section-mobile-promo",
+          "name": "Mobile Winning Numbers Banner",
+          "selector": [
+            ".alc-mobile-promo"
+          ],
+          "style": "mobile-only",
+          "blocks": [],
+          "defaultContent": [
+            ".alc-mobile-promo"
+          ]
+        },
         {
           "id": "section-hero-carousel",
           "name": "Hero Carousel",
@@ -55,7 +67,7 @@
           "selector": [
             "div.section-header.cmp-section-header--alc-blue"
           ],
-          "style": "light-blue",
+          "style": "light-blue, blue-heading",
           "blocks": [
             "carousel-winners"
           ],
@@ -67,9 +79,9 @@
           "id": "section-featured-games",
           "name": "Featured Games and Promotions",
           "selector": [
-            "div.alc-container:nth-of-type(3)"
+            "div.section-header.cmp-section-header--alc-green"
           ],
-          "style": null,
+          "style": "green-heading, sidebar",
           "blocks": [
             "cards-game-tiles",
             "cards-promo-banner"

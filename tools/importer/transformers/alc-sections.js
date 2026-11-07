@@ -60,21 +60,11 @@ export default function transform(hookName, element, payload) {
       let insertionPoint = null;
 
       if (i < sections.length - 1) {
-        // Find the next section's <hr> (the break after this section's content)
-        // Walk siblings from marker forward to find the next <hr>
-        let sibling = marker.nextElementSibling;
-        while (sibling) {
-          if (sibling.tagName === 'HR' && !sibling.hasAttribute('data-excat-section-id')) {
-            insertionPoint = sibling;
-            break;
-          }
-          if (sibling.tagName === 'HR' && sibling.hasAttribute('data-excat-section-id')
-            && sibling.getAttribute('data-excat-section-id') !== section.id) {
-            insertionPoint = sibling;
-            break;
-          }
-          sibling = sibling.nextElementSibling;
-        }
+        // Next section break in document order; it is not necessarily a sibling of the marker
+        // (source sections are nested in different grid containers).
+        insertionPoint = [...document.querySelectorAll('hr')].find((hr) => hr !== marker
+          && (marker.compareDocumentPosition(hr) & Node.DOCUMENT_POSITION_FOLLOWING)
+          && hr.getAttribute('data-excat-section-id') !== section.id) || null;
       }
 
       // Create Section Metadata block

@@ -7,6 +7,8 @@
   --light-color: #f1f1f1;
   --dark-color: #333;
   --alc-blue: #009ddb;
+  --alc-light-blue: #65baf7;
+  --alc-dark-blue: #00529b;
   --alc-green: #aaba0a;
 
   /* fonts */
@@ -27,13 +29,13 @@
   --heading-font-size-xs: 16px;
 
   /* spacing */
-  --section-padding: 32px 0;
   --content-max-width: 1170px;
-  --nav-height: 100px;
+  --nav-height: 70px;
 }
 
 @media (width >= 900px) {
   :root {
+    --nav-height: 141px;
     --heading-font-size-xxl: 36px;
     --heading-font-size-xl: 22px;
     --heading-font-size-l: 18px;

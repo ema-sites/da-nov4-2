@@ -11,12 +11,16 @@ export default function parse(element, { document }) {
     if (!slideContent) return;
 
     // Col 1: background image from the slide
+    // Winner photo is a CSS background on .winner-image (filenames contain spaces).
     const imageCell = document.createElement('div');
-    const bgImg = slideContent.querySelector(':scope > img');
-    if (bgImg) {
+    const photoHost = slide.querySelector('.winner-image');
+    const photoStyle = photoHost ? (photoHost.getAttribute('style') || '') : '';
+    const photoMatch = photoStyle.match(/background-image:\s*url\(["']?([^"')]+)["']?\)/i);
+    const photoSrc = photoMatch ? photoMatch[1] : slideContent.querySelector(':scope > img')?.getAttribute('src');
+    if (photoSrc) {
       const newImg = document.createElement('img');
-      newImg.src = bgImg.src;
-      if (bgImg.alt) newImg.alt = bgImg.alt;
+      newImg.src = encodeURI(decodeURI(photoSrc));
+      newImg.alt = slide.querySelector('.winner-info h3')?.textContent.trim() || '';
       imageCell.appendChild(newImg);
     }
 
@@ -57,12 +61,12 @@ export default function parse(element, { document }) {
     }
 
     // Prize amount
+    // Server HTML holds a raw number (e.g. 500000); client JS later splits it into spans.
     const prizeAmount = slide.querySelector('.prize-amount');
-    if (prizeAmount) {
+    const prizeDigits = prizeAmount ? prizeAmount.textContent.replace(/[^0-9]/g, '') : '';
+    if (prizeDigits) {
       const prize = document.createElement('p');
-      const spans = prizeAmount.querySelectorAll('span');
-      const prizeText = Array.from(spans).map((s) => s.textContent.trim()).filter(Boolean).join(',');
-      prize.textContent = `$${prizeText}`;
+      prize.textContent = `$${Number(prizeDigits).toLocaleString('en-US')}`;
       textCell.appendChild(prize);
     }
 

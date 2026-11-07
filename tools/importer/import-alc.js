@@ -37,11 +37,23 @@ const PAGE_TEMPLATE = {
     {
       "name": "cards-promo-banner",
       "instances": [
-        "div.html-promo.parbase"
+        ".alc-container.aem-GridColumn--sm--6.aem-GridColumn--md--6"
       ]
     }
   ],
   "sections": [
+    {
+      "id": "section-mobile-promo",
+      "name": "Mobile Winning Numbers Banner",
+      "selector": [
+        ".alc-mobile-promo"
+      ],
+      "style": "mobile-only",
+      "blocks": [],
+      "defaultContent": [
+        ".alc-mobile-promo"
+      ]
+    },
     {
       "id": "section-hero-carousel",
       "name": "Hero Carousel",
@@ -60,7 +72,7 @@ const PAGE_TEMPLATE = {
       "selector": [
         "div.section-header.cmp-section-header--alc-blue"
       ],
-      "style": "light-blue",
+      "style": "light-blue, blue-heading",
       "blocks": [
         "carousel-winners"
       ],
@@ -72,9 +84,9 @@ const PAGE_TEMPLATE = {
       "id": "section-featured-games",
       "name": "Featured Games and Promotions",
       "selector": [
-        "div.alc-container:nth-of-type(3)"
+        "div.section-header.cmp-section-header--alc-green"
       ],
-      "style": null,
+      "style": "green-heading, sidebar",
       "blocks": [
         "cards-game-tiles",
         "cards-promo-banner"
@@ -116,6 +128,18 @@ function findBlocksOnPage(document, template) {
 }
 
 export default {
+  // Picturefill renditions sit in empty <span data-src> elements, which html2md strips
+  // before parsers run; copy them onto the container first.
+  onLoad: ({ document }) => {
+    document.querySelectorAll('.picturefill-background').forEach((el) => {
+      const srcs = [...el.querySelectorAll('[data-src]')].map((s) => ({
+        media: s.getAttribute('data-media') || '',
+        src: s.getAttribute('data-src'),
+      }));
+      if (srcs.length) el.setAttribute('data-picturefill-srcs', JSON.stringify(srcs));
+    });
+  },
+
   transform: (payload) => {
     const { document, url, params } = payload;
     const main = document.body;

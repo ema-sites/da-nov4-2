@@ -1,6 +1,12 @@
-.carousel-hero-banner-container .carousel-hero-banner-wrapper {
-  max-width: unset;
+/* full-bleed: break out of the 1170px section column */
+main > .section > .carousel-hero-banner-wrapper {
+  max-width: 100%;
+  margin: 0;
   padding: 0;
+}
+
+.carousel-hero-banner {
+  position: relative;
 }
 
 .carousel-hero-banner .carousel-hero-banner-slides-container {
@@ -19,125 +25,223 @@
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   overflow: scroll clip;
+  scrollbar-width: none;
 }
 
 .carousel-hero-banner .carousel-hero-banner-slides::-webkit-scrollbar {
   display: none;
 }
 
+/*
+ * Source: slide is 525px tall (375px below 768px with a separate mobile rendition),
+ * artwork is a 1900x525 background at natural size, centred at the bottom.
+ * We only have the desktop rendition, so below 1200px the slide keeps the
+ * 1200x525 centre of the artwork in view (aspect 16/7) instead of cropping text off.
+ */
 .carousel-hero-banner .carousel-hero-banner-slide {
   flex: 0 0 100%;
   scroll-snap-align: start;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
   position: relative;
   width: 100%;
-  min-height: min(50vw, calc(100dvh - var(--header-height)));
+  aspect-ratio: 16 / 7;
+  max-height: 525px;
+  overflow: hidden;
 }
 
-.carousel-hero-banner .carousel-hero-banner-slide .carousel-hero-banner-slide-image picture {
+.carousel-hero-banner .carousel-hero-banner-slide-image,
+.carousel-hero-banner .carousel-hero-banner-slide-image p,
+.carousel-hero-banner .carousel-hero-banner-slide-image picture {
   position: absolute;
   inset: 0;
+  margin: 0;
 }
 
-.carousel-hero-banner .carousel-hero-banner-slide .carousel-hero-banner-slide-image picture > img {
-  height: 100%;
+.carousel-hero-banner .carousel-hero-banner-slide-image img {
+  display: block;
   width: 100%;
+  height: 100%;
+  max-width: none;
   object-fit: cover;
+  object-position: center bottom;
 }
 
-.carousel-hero-banner .carousel-hero-banner-slide .carousel-hero-banner-slide-content {
+/* no visible slide copy: the artwork itself is the link */
+.carousel-hero-banner .carousel-hero-banner-slide-content {
+  position: static;
+  margin: 0;
+  padding: 0;
+}
+
+.carousel-hero-banner .carousel-hero-banner-slide-content > * {
+  margin: 0;
+}
+
+.carousel-hero-banner .carousel-hero-banner-slide-content .button-container {
+  display: block;
+  margin: 0;
+}
+
+main .carousel-hero-banner a.carousel-hero-banner-slide-link:any-link {
+  position: absolute;
+  inset: 0;
   z-index: 1;
-  margin: 68px;
-  padding: 16px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  white-space: nowrap;
+  text-decoration: none;
+  text-indent: -9999px;
+}
+
+main .carousel-hero-banner a.carousel-hero-banner-slide-link:focus-visible {
+  outline: 3px solid var(--alc-blue);
+  outline-offset: -3px;
+}
+
+/* control bar: .hero .alc-carousel .controls */
+.carousel-hero-banner .carousel-hero-banner-controls {
   position: relative;
-  width: var(--slide-content-width, auto);
+  z-index: 10;
+  width: 100%;
+  height: 52px;
+  background: rgb(255 255 255 / 90%);
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls-container {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 5px;
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls nav {
+  display: flex;
+  flex-grow: 1;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .carousel-hero-banner .carousel-hero-banner-slide-indicators {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 12px;
-  padding: 12px;
-  line-height: 0;
+  align-items: center;
+  height: 100%;
 }
 
-.carousel-hero-banner .carousel-hero-banner-slide-indicator button {
-  width: 24px;
-  height: 24px;
+.carousel-hero-banner .carousel-hero-banner-slide-indicator {
+  display: flex;
   margin: 0;
   padding: 0;
-  border-radius: 50%;
-  background-color: #dadada;
-  transition: background-color 0.2s;
 }
 
-.carousel-hero-banner .carousel-hero-banner-slide-indicator button:disabled,
-.carousel-hero-banner .carousel-hero-banner-slide-indicator button:hover,
-.carousel-hero-banner .carousel-hero-banner-slide-indicator button:focus-visible {
-  background-color: var(--text-color);
-}
-
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  left: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  z-index: 1;
-}
-
-/* stylelint-disable-next-line no-descending-specificity */
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons button {
+/* .alc-carousel .paginator */
+.carousel-hero-banner .carousel-hero-banner-slide-indicator button {
   position: relative;
   width: 44px;
-  height: 44px;
-  margin: 0;
+  height: 24px;
+  margin: 0 4px;
+  padding: 1px 6px;
+  overflow: hidden;
+  border: 0;
   border-radius: 50%;
-  padding: 0;
-  background-color: rgb(19 19 19 / 25%);
-  transition: background-color 0.2s;
+  background: transparent;
+  color: transparent;
+  text-indent: -999px;
+  cursor: pointer;
 }
 
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons button:hover,
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons button:focus-visible {
-  background-color: rgb(19 19 19 / 75%);
-}
-
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons button::after {
-  display: block;
+.carousel-hero-banner .carousel-hero-banner-slide-indicator button::after {
   content: '';
-  border: 2px solid;
-  border-bottom: 0;
-  border-left: 0;
-  height: 12px;
-  width: 12px;
   position: absolute;
   top: 50%;
-  left: calc(50% + 2px);
-  transform: translate(-50%, -50%) rotate(-135deg);
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-color);
+  transform: translate(-50%, -50%);
 }
 
-.carousel-hero-banner .carousel-hero-banner-navigation-buttons button.slide-next::after {
-  transform: translate(-50%, -50%) rotate(45deg);
-  left: calc(50% - 2px);
+.carousel-hero-banner .carousel-hero-banner-slide-indicator button[aria-current='true']::after,
+.carousel-hero-banner .carousel-hero-banner-slide-indicator button:hover::after,
+.carousel-hero-banner .carousel-hero-banner-slide-indicator button:focus-visible::after {
+  background: var(--alc-blue);
 }
 
-@media (width >= 600px) {
-  .carousel-hero-banner .carousel-hero-banner-navigation-buttons {
-    left: 24px;
-    right: 24px;
+/* .hero .alc-carousel .np-btn: Material Icons keyboard_arrow_left/right, 28px, #009ddb */
+.carousel-hero-banner .carousel-hero-banner-controls .slide-prev,
+.carousel-hero-banner .carousel-hero-banner-controls .slide-next {
+  position: relative;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 52px;
+  margin: 0;
+  padding: 1px 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--alc-blue);
+  cursor: pointer;
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls .slide-next {
+  order: 3;
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls .slide-prev::after,
+.carousel-hero-banner .carousel-hero-banner-controls .slide-next::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  background-color: currentcolor;
+  transform: translate(-50%, -50%);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.41 16.59 10.83 12l4.58-4.59L14 6l-6 6 6 6z' stroke='%23000' stroke-width='.6'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls .slide-next::after {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z' stroke='%23000' stroke-width='.6'/%3E%3C/svg%3E");
+}
+
+.carousel-hero-banner .carousel-hero-banner-controls button:focus-visible {
+  outline: 2px solid var(--alc-blue);
+  outline-offset: -2px;
+}
+
+/*
+ * Source mobile (< 768px): 375px-tall slide, 767x375 mobile artwork at natural size
+ * centred at the bottom, control bar overlaid. Only when the mobile rendition is authored;
+ * single-image blocks keep the scaled desktop composition with the bar below.
+ */
+@media (width < 768px) {
+  .carousel-hero-banner.carousel-hero-banner-mobile-art .carousel-hero-banner-slide {
+    aspect-ratio: auto;
+    height: 375px;
+    max-height: none;
   }
 
-  .carousel-hero-banner .carousel-hero-banner-slide .carousel-hero-banner-slide-content {
-    --slide-content-width: calc((100% - 184px) / 2);
+  .carousel-hero-banner.carousel-hero-banner-mobile-art .carousel-hero-banner-controls {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+}
 
-    margin: 92px;
+/* source desktop: slide 525px tall, control bar overlays the bottom of the artwork */
+@media (width >= 1200px) {
+  .carousel-hero-banner .carousel-hero-banner-controls {
+    position: absolute;
+    left: 0;
+    bottom: 0;
   }
 }

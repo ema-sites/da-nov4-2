@@ -1,5 +1,8 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 
+/* source carousel: data-autoplay="enabled" data-play-speed="6500" */
+const AUTOPLAY_DELAY = 6500;
+
 function updateActiveSlide(slide) {
   const block = slide.closest('.carousel-hero-banner');
   const slideIndex = parseInt(slide.dataset.slideIndex, 10);
@@ -22,10 +25,8 @@ function updateActiveSlide(slide) {
   indicators.forEach((indicator, idx) => {
     const button = indicator.querySelector('button');
     if (idx !== slideIndex) {
-      button.removeAttribute('disabled');
       button.removeAttribute('aria-current');
     } else {
-      button.setAttribute('disabled', true);
       button.setAttribute('aria-current', true);
     }
   });
@@ -45,22 +46,49 @@ function showSlide(block, slideIndex = 0) {
   });
 }
 
+function startAutoplay(block) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let timer;
+  const stop = () => {
+    clearInterval(timer);
+    timer = undefined;
+  };
+  const start = () => {
+    stop();
+    timer = setInterval(() => {
+      if (document.hidden) return;
+      showSlide(block, parseInt(block.dataset.activeSlide || 0, 10) + 1);
+    }, AUTOPLAY_DELAY);
+  };
+
+  block.addEventListener('mouseenter', stop);
+  block.addEventListener('mouseleave', () => {
+    if (!block.contains(document.activeElement)) start();
+  });
+  block.addEventListener('focusin', stop);
+  block.addEventListener('focusout', (e) => {
+    if (!block.contains(e.relatedTarget) && !block.matches(':hover')) start();
+  });
+  start();
+}
+
 function bindEvents(block) {
-  const slideIndicators = block.querySelector('.carousel-hero-banner-slide-indicators');
-  if (!slideIndicators) return;
+  const controls = block.querySelector('.carousel-hero-banner-controls');
+  if (!controls) return;
 
-  slideIndicators.querySelectorAll('button').forEach((button) => {
-    button.addEventListener('click', (e) => {
-      const slideIndicator = e.currentTarget.parentElement;
-      showSlide(block, parseInt(slideIndicator.dataset.targetSlide, 10));
-    });
-  });
-
-  block.querySelector('.slide-prev').addEventListener('click', () => {
-    showSlide(block, parseInt(block.dataset.activeSlide, 10) - 1);
-  });
-  block.querySelector('.slide-next').addEventListener('click', () => {
-    showSlide(block, parseInt(block.dataset.activeSlide, 10) + 1);
+  controls.addEventListener('click', (e) => {
+    const button = e.target.closest('button');
+    if (!button) return;
+    const activeSlide = parseInt(block.dataset.activeSlide || 0, 10);
+    if (button.classList.contains('slide-prev')) {
+      showSlide(block, activeSlide - 1);
+    } else if (button.classList.contains('slide-next')) {
+      showSlide(block, activeSlide + 1);
+    } else {
+      const indicator = button.closest('.carousel-hero-banner-slide-indicator');
+      if (indicator) showSlide(block, parseInt(indicator.dataset.targetSlide, 10));
+    }
   });
 
   const slideObserver = new IntersectionObserver((entries) => {
@@ -71,6 +99,39 @@ function bindEvents(block) {
   block.querySelectorAll('.carousel-hero-banner-slide').forEach((slide) => {
     slideObserver.observe(slide);
   });
+
+  startAutoplay(block);
+}
+
+/* same-origin, non-SVG images go through the media bus; remote ones are used as-is */
+function imageUrl(src, width) {
+  const url = new URL(src, window.location.href);
+  if (url.origin !== window.location.origin || /\.svg$/i.test(url.pathname)) return url.href;
+  return `${url.pathname}?width=${width}&format=webply&optimize=medium`;
+}
+
+/*
+ * Image cell may hold [desktop] or [desktop, mobile] renditions.
+ * With two, build one <picture>: mobile below 768px, desktop from 768px (source breakpoint).
+ */
+function buildResponsiveArt(column, eager) {
+  const imgs = [...column.querySelectorAll('img')];
+  if (imgs.length < 2) return false;
+
+  const [desktop, mobile] = imgs;
+  const picture = document.createElement('picture');
+  const source = document.createElement('source');
+  source.media = '(width >= 768px)';
+  source.srcset = imageUrl(desktop.src, 2000);
+  const img = document.createElement('img');
+  img.src = imageUrl(mobile.src, 750);
+  img.alt = desktop.alt || mobile.alt || '';
+  if (eager) img.loading = 'eager';
+  img.dataset.responsiveArt = 'true';
+  picture.append(source, img);
+
+  column.replaceChildren(picture);
+  return true;
 }
 
 function createSlide(row, slideIndex, carouselId) {
@@ -81,8 +142,20 @@ function createSlide(row, slideIndex, carouselId) {
 
   row.querySelectorAll(':scope > div').forEach((column, colIdx) => {
     column.classList.add(`carousel-hero-banner-slide-${colIdx === 0 ? 'image' : 'content'}`);
+    if (colIdx === 0 && buildResponsiveArt(column, slideIndex === 0)) {
+      slide.classList.add('carousel-hero-banner-slide-responsive-art');
+    }
     slide.append(column);
   });
+
+  /* the artwork is the link: stretch the first CTA over the whole slide */
+  const link = slide.querySelector('.carousel-hero-banner-slide-content a[href]')
+    || slide.querySelector('a[href]');
+  if (link) {
+    link.classList.add('carousel-hero-banner-slide-link');
+    link.classList.remove('button', 'primary', 'secondary');
+    slide.classList.add('carousel-hero-banner-slide-linked');
+  }
 
   const labeledBy = slide.querySelector('h1, h2, h3, h4, h5, h6');
   if (labeledBy) {
@@ -107,25 +180,23 @@ export default async function decorate(block) {
 
   const slidesWrapper = document.createElement('ul');
   slidesWrapper.classList.add('carousel-hero-banner-slides');
-  block.prepend(slidesWrapper);
 
+  /* single control bar, like the source: prev | indicators | next */
   let slideIndicators;
+  let controls;
   if (!isSingleSlide) {
-    const slideIndicatorsNav = document.createElement('nav');
-    slideIndicatorsNav.setAttribute('aria-label', 'Carousel Slide Controls');
-    slideIndicators = document.createElement('ol');
-    slideIndicators.classList.add('carousel-hero-banner-slide-indicators');
-    slideIndicatorsNav.append(slideIndicators);
-    block.append(slideIndicatorsNav);
-
-    const slideNavButtons = document.createElement('div');
-    slideNavButtons.classList.add('carousel-hero-banner-navigation-buttons');
-    slideNavButtons.innerHTML = `
-      <button type="button" class="slide-prev" aria-label="Previous Slide"></button>
-      <button type="button" class="slide-next" aria-label="Next Slide"></button>
+    controls = document.createElement('div');
+    controls.classList.add('carousel-hero-banner-controls');
+    controls.innerHTML = `
+      <div class="carousel-hero-banner-controls-container">
+        <button type="button" class="slide-prev" aria-label="Previous Slide"></button>
+        <nav aria-label="Carousel Slide Controls">
+          <ol class="carousel-hero-banner-slide-indicators"></ol>
+        </nav>
+        <button type="button" class="slide-next" aria-label="Next Slide"></button>
+      </div>
     `;
-
-    container.append(slideNavButtons);
+    slideIndicators = controls.querySelector('.carousel-hero-banner-slide-indicators');
   }
 
   rows.forEach((row, idx) => {
@@ -136,7 +207,7 @@ export default async function decorate(block) {
       const indicator = document.createElement('li');
       indicator.classList.add('carousel-hero-banner-slide-indicator');
       indicator.dataset.targetSlide = idx;
-      indicator.innerHTML = `<button type="button" aria-label="Show Slide ${idx + 1} of ${rows.length}"></button>`;
+      indicator.innerHTML = `<button type="button" aria-label="Show Slide ${idx + 1} of ${rows.length}">${idx + 1}</button>`;
       slideIndicators.append(indicator);
     }
     row.remove();
@@ -144,12 +215,20 @@ export default async function decorate(block) {
 
   container.append(slidesWrapper);
   block.prepend(container);
+  if (controls) block.append(controls);
 
-  /* optimize same-origin, non-SVG images */
-  block.querySelectorAll('picture > img').forEach((img) => {
+  if (block.querySelector('.carousel-hero-banner-slide-responsive-art')) {
+    block.classList.add('carousel-hero-banner-mobile-art');
+  }
+
+  /* optimize same-origin, non-SVG single-rendition images */
+  block.querySelectorAll('picture > img:not([data-responsive-art])').forEach((img, idx) => {
     const url = new URL(img.src, window.location.href);
-    if (url.origin !== window.location.origin || /\.svg$/i.test(url.pathname)) return;
-    img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]));
+    if (url.origin !== window.location.origin || /\.svg$/i.test(url.pathname)) {
+      if (idx === 0) img.loading = 'eager';
+      return;
+    }
+    img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, idx === 0, [{ width: '2000' }]));
   });
 
   if (!isSingleSlide) {

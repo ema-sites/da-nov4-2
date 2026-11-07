@@ -1,23 +1,31 @@
 /* eslint-disable */
 /* global WebImporter */
+
+// Right-rail column of linked promo images. The same column class also matches an empty ad slot.
 export default function parse(element, { document }) {
   const cells = [];
 
-  // The promo banner contains a single clickable link with CSS background image.
-  // The <a> wraps empty <span> elements used for picturefill responsive backgrounds.
-  // The importer removes empty inline elements, so we reconstruct the link.
-  const link = element.querySelector('a.html-promo-image-container');
-  if (link) {
-    const href = link.getAttribute('href') || '';
+  element.querySelectorAll('.cmp-image a[href]').forEach((link) => {
+    const sourceImg = link.querySelector('img');
+    if (!sourceImg) return;
+    const src = sourceImg.getAttribute('src') || sourceImg.getAttribute('data-src');
+    if (!src) return;
 
-    // Build a single-column card row with the link
-    const contentCell = document.createElement('div');
     const anchor = document.createElement('a');
-    anchor.setAttribute('href', href);
-    anchor.textContent = 'View Promo';
-    contentCell.appendChild(anchor);
+    anchor.setAttribute('href', link.getAttribute('href'));
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = sourceImg.getAttribute('alt') || '';
+    anchor.appendChild(img);
 
-    cells.push([contentCell]);
+    const cell = document.createElement('div');
+    cell.appendChild(anchor);
+    cells.push([cell]);
+  });
+
+  if (!cells.length) {
+    element.remove();
+    return;
   }
 
   const block = WebImporter.Blocks.createBlock(document, { name: 'cards-promo-banner', cells });
