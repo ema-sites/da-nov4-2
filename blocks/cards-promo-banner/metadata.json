@@ -1,0 +1,11 @@
+{
+  "variantName": "cards-promo-banner",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Vertical stack of promotional image links. Each is a clickable image banner linking to a promotional page.",
+  "contentPattern": "Each row is one promotional banner. Column 1: promotional image. Column 2: link to promotional page (the entire card becomes clickable).",
+  "options": [],
+  "memberVariantIds": [],
+  "usage": "Use for displaying a vertical stack of clickable promotional banners in a sidebar or rail.",
+  "reuseGuidance": "Each card row should have a promotional banner image in the first cell and a link in the second cell."
+}

@@ -1,0 +1,42 @@
+.cards-game-tiles > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.cards-game-tiles > ul > li {
+  border: 1px solid #dadada;
+  background-color: var(--background-color);
+  overflow: hidden;
+}
+
+.cards-game-tiles .cards-game-tiles-card-image {
+  line-height: 0;
+}
+
+.cards-game-tiles .cards-game-tiles-card-body {
+  padding: 16px;
+}
+
+.cards-game-tiles > ul > li img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.cards-game-tiles .cards-game-tiles-card-body h3 {
+  margin-top: 0;
+}
+
+.cards-game-tiles .cards-game-tiles-card-body .button-container {
+  margin-top: 16px;
+}
+
+@media (width < 600px) {
+  .cards-game-tiles > ul {
+    grid-template-columns: 1fr;
+  }
+}

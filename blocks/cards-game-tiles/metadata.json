@@ -1,0 +1,11 @@
+{
+  "variantName": "cards-game-tiles",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Grid of game tiles in 2 columns. Each tile has a header image, game title (h3), description, optional draw info, and a CTA button.",
+  "contentPattern": "Each row is one card. Column 1: game image. Column 2: game title (h3), description paragraph, optional draw info, and CTA button link.",
+  "options": [],
+  "memberVariantIds": [],
+  "usage": "Use for displaying game or product tiles in a structured grid layout with images and call-to-action buttons.",
+  "reuseGuidance": "Each card row should have a game image in the first cell and text content (title, description, optional details, CTA link) in the second cell."
+}

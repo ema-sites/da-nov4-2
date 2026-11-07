@@ -1,0 +1,11 @@
+{
+  "variantName": "carousel-winners",
+  "baseBlock": "carousel",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Carousel of recent lottery winners. Each slide shows a winner photo, name, location, game logo, Winner badge, and formatted prize amount. 4 slides with navigation.",
+  "contentPattern": "Each row is one slide. Column 1: winner photo. Column 2: winner name, location, game logo, badge text, and prize amount.",
+  "options": [],
+  "memberVariantIds": [],
+  "usage": "Use for showcasing lottery or contest winners in a rotating carousel format.",
+  "reuseGuidance": "Each slide row should have a winner photo in the first cell and winner details (name, location, prize) in the second cell."
+}

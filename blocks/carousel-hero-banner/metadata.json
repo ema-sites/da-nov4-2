@@ -1,0 +1,11 @@
+{
+  "variantName": "carousel-hero-banner",
+  "baseBlock": "carousel",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Full-width hero carousel with 5 promotional slides. Each slide has a background image, headline/description text overlay, and a CTA link.",
+  "contentPattern": "Each row is one slide. Column 1: background image. Column 2: headline, description text, and CTA link.",
+  "options": [],
+  "memberVariantIds": [],
+  "usage": "Use for full-width hero banners at the top of landing pages with rotating promotional content.",
+  "reuseGuidance": "Each slide row should have an image in the first cell and text content with an optional CTA link in the second cell."
+}
