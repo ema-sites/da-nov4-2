@@ -1,0 +1,44 @@
+:root {
+  /* brand colors */
+  --background-color: #fff;
+  --text-color: #69727b;
+  --link-color: #006faf;
+  --link-hover-color: #005a8e;
+  --light-color: #f1f1f1;
+  --dark-color: #333;
+  --alc-blue: #009ddb;
+  --alc-green: #aaba0a;
+
+  /* fonts */
+  --body-font-family: "proxima-nova", "Helvetica Neue", helvetica, arial, sans-serif;
+  --heading-font-family: "Ubuntu", "Helvetica Neue", helvetica, arial, sans-serif;
+
+  /* body sizes */
+  --body-font-size-m: 16px;
+  --body-font-size-s: 14px;
+  --body-font-size-xs: 12px;
+
+  /* heading sizes */
+  --heading-font-size-xxl: 36px;
+  --heading-font-size-xl: 28px;
+  --heading-font-size-l: 24px;
+  --heading-font-size-m: 20px;
+  --heading-font-size-s: 18px;
+  --heading-font-size-xs: 16px;
+
+  /* spacing */
+  --section-padding: 32px 0;
+  --content-max-width: 1170px;
+  --nav-height: 100px;
+}
+
+@media (width >= 900px) {
+  :root {
+    --heading-font-size-xxl: 36px;
+    --heading-font-size-xl: 22px;
+    --heading-font-size-l: 18px;
+    --heading-font-size-m: 16px;
+    --heading-font-size-s: 14px;
+    --heading-font-size-xs: 13px;
+  }
+}

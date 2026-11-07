@@ -1,20 +1,77 @@
 footer {
   background-color: var(--light-color);
   font-size: var(--body-font-size-xs);
+  color: var(--text-color);
 }
 
 footer .footer > div {
   margin: auto;
-  max-width: 1200px;
-  padding: 40px 24px 24px;
+  max-width: var(--content-max-width);
+  padding: 32px 15px 24px;
+}
+
+footer .footer > div:first-child {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+footer .footer h3 {
+  font-family: var(--heading-font-family);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark-color);
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+footer .footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+footer .footer ul li {
+  padding: 2px 0;
+}
+
+footer .footer a:any-link {
+  color: var(--link-color);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+footer .footer a:hover {
+  text-decoration: underline;
 }
 
 footer .footer p {
   margin: 0;
 }
 
+footer .footer > div:last-child {
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+  text-align: center;
+  font-size: 11px;
+}
+
+footer .footer > div:last-child p {
+  margin: 4px 0;
+}
+
+footer .footer > div:last-child a:any-link {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
 @media (width >= 900px) {
   footer .footer > div {
-    padding: 40px 32px 24px;
+    padding: 32px 32px 24px;
+  }
+
+  footer .footer > div:first-child {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
   }
 }
